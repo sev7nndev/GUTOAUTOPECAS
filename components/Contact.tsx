@@ -290,6 +290,7 @@ const Contact: React.FC = () => {
                         style={{border:0, filter: 'contrast(1.1) saturate(1.1)'}} 
                         allowFullScreen={true} 
                         loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
                         title={`Mapa ${branch.name}`}
                         className="absolute inset-0 w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
                     ></iframe>

@@ -43,14 +43,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
     <nav 
       className={`sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/5 ${
         scrolled 
-          ? 'bg-brand-dark/90 backdrop-blur-md py-1 shadow-lg shadow-black/50' 
-          : 'bg-brand-dark py-2'
+          ? 'bg-brand-dark/90 backdrop-blur-md py-2 shadow-lg shadow-black/50' 
+          : 'bg-brand-dark py-3'
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between md:justify-between items-center">
           {/* Logo Area */}
-          <div className="flex items-center flex-shrink-0">
+          <div className="flex items-center flex-shrink-0 mx-auto md:mx-0">
              <a 
                href="#" 
                onClick={(e) => handleLinkClick(e, '#')}
@@ -63,10 +63,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                   <img 
                     src={content.logo.url} 
                     alt="Logo Guto Auto Peças" 
-                    className="h-10 md:h-14 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-105" 
+                    className="h-12 md:h-16 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-105" 
                   />
                 ) : (
-                  <Logo className="h-10 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105 relative z-10" />
+                  <Logo className="h-12 md:h-14 w-auto transition-transform duration-300 group-hover:scale-105 relative z-10" />
                 )}
              </a>
           </div>
