@@ -6,7 +6,7 @@ const TopBar: React.FC = () => {
   const { content } = useContent();
   
   return (
-    <div className="bg-[#020202] text-gray-400 text-[10px] sm:text-xs font-medium py-2.5 px-4 border-b border-white/10 tracking-wide">
+    <div className="bg-brand-charcoal text-gray-300 text-[10px] sm:text-xs font-medium py-2.5 px-4 border-b border-white/10 tracking-wide">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-2">
