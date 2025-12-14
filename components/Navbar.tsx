@@ -38,12 +38,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
     { name: 'Contato', href: '#contato' },
   ];
 
+
   return (
     <nav 
       className={`sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/5 ${
         scrolled 
-          ? 'bg-brand-dark/90 backdrop-blur-md py-2 shadow-lg shadow-black/50' 
-          : 'bg-brand-dark py-3'
+          ? 'bg-brand-dark/90 backdrop-blur-md py-1 shadow-lg shadow-black/50' 
+          : 'bg-brand-dark py-2'
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,10 +63,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                   <img 
                     src={content.logo.url} 
                     alt="Logo Guto Auto Peças" 
-                    className="h-14 md:h-20 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-105" 
+                    className="h-10 md:h-14 w-auto object-contain relative z-10 transition-transform duration-300 group-hover:scale-105" 
                   />
                 ) : (
-                  <Logo className="h-12 md:h-16 w-auto transition-transform duration-300 group-hover:scale-105 relative z-10" />
+                  <Logo className="h-10 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105 relative z-10" />
                 )}
              </a>
           </div>
