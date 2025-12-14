@@ -84,7 +84,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
                   <ArrowRight className="w-5 h-5" />
                 </button>
              </div>
-             <div className="px-4 py-2 flex gap-4 text-xs text-gray-400 overflow-x-auto no-scrollbar justify-center">
+             <div className="hidden sm:flex px-4 py-2 gap-4 text-xs text-gray-400 overflow-x-auto no-scrollbar justify-center">
                 <span className="whitespace-nowrap">Populares:</span>
                 <button onClick={() => onSearch && onSearch('Amortecedor')} className="hover:text-white underline decoration-brand-red/50">Amortecedores</button>
                 <button onClick={() => onSearch && onSearch('Óleo')} className="hover:text-white underline decoration-brand-red/50">Óleo 5w30</button>
