@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useContent } from '../contexts/ContentContext';
-import { Save, RefreshCw, LogOut, Layout, Phone, Image, Upload, XCircle, Check, Loader2, Camera, Plus, Trash2, Box, Edit, Search, Layers } from 'lucide-react';
-import { Product, Category } from '../types';
+import { Save, RefreshCw, LogOut, Layout, Phone, Image, Upload, XCircle, Check, Loader2, Camera, Plus, Trash2, Box, Edit, Search, Layers, Mail, Eye, Clock } from 'lucide-react';
+import { Product, Category, Lead } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -47,7 +48,7 @@ const compressImage = async (file: File, maxWidth: number = 800): Promise<string
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const { content, updateContent, resetContent } = useContent();
-  const [activeTab, setActiveTab] = useState<'hero' | 'contact' | 'brands' | 'logo' | 'gallery' | 'inventory' | 'categories'>('inventory');
+  const [activeTab, setActiveTab] = useState<'hero' | 'contact' | 'brands' | 'logo' | 'gallery' | 'inventory' | 'categories' | 'leads'>('inventory');
   
   // Local State for Form Fields
   const [tempHero, setTempHero] = useState(content.hero);
@@ -63,6 +64,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   
+  // Leads State
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
+  
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   // --- Synchronization Effect ---
@@ -77,32 +82,60 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     setTempCategories(content.categories || []);
   }, [content]);
 
+  // --- Fetch Leads from Supabase ---
+  const fetchLeads = async () => {
+    setLoadingLeads(true);
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setLeads(data || []);
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+    } finally {
+      setLoadingLeads(false);
+    }
+  };
+
+  // Fetch leads when Leads tab is active
+  useEffect(() => {
+    if (activeTab === 'leads') {
+      fetchLeads();
+      // Auto-refresh every 30 seconds
+      const interval = setInterval(fetchLeads, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
   // --- Handlers ---
 
   const handleSave = async () => {
     setSaveStatus('saving');
-    
-    // Simulate a small delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
         const parsedBrands = JSON.parse(tempBrands);
 
-        // Update all sections atomically
-        updateContent('hero', tempHero);
-        updateContent('contact', tempContact);
-        updateContent('logo', tempLogo);
-        updateContent('brands', parsedBrands);
-        updateContent('about', { images: tempGallery });
-        updateContent('products', products);
-        updateContent('categories', tempCategories);
+        // Update all sections - await all promises
+        await Promise.all([
+          updateContent('hero', tempHero),
+          updateContent('contact', tempContact),
+          updateContent('logo', tempLogo),
+          updateContent('brands', parsedBrands),
+          updateContent('about', { images: tempGallery }),
+          updateContent('products', products),
+          updateContent('categories', tempCategories)
+        ]);
         
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
 
     } catch (e) {
         setSaveStatus('idle');
-        alert("Erro no formato JSON das marcas. Verifique a sintaxe.");
+        alert("Erro ao salvar. Verifique o console e a sintaxe JSON das marcas.");
+        console.error("Save error:", e);
     }
   };
 
@@ -196,22 +229,125 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       }
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (!editingProduct) return;
     
-    if (products.some(p => p.id === editingProduct.id)) {
+    try {
+      // Check if editing or creating new
+      const isEditing = products.some(p => p.id === editingProduct.id);
+      
+      if (isEditing) {
+        // Update existing product in Supabase
+        const { error } = await supabase
+          .from('products')
+          .update({
+            name: editingProduct.name,
+            category: editingProduct.category,
+            brand: editingProduct.brand,
+            price: editingProduct.price,
+            image: editingProduct.image,
+            description: editingProduct.description,
+            in_stock: editingProduct.inStock
+          })
+          .eq('id', editingProduct.id);
+        
+        if (error) throw error;
+        
+        // Update local state
         setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
-    } else {
+      } else {
+        // Insert new product in Supabase
+        const { error } = await supabase
+          .from('products')
+          .insert({
+            id: editingProduct.id,
+            name: editingProduct.name,
+            category: editingProduct.category,
+            brand: editingProduct.brand,
+            price: editingProduct.price,
+            image: editingProduct.image,
+            description: editingProduct.description,
+            in_stock: editingProduct.inStock
+          });
+        
+        if (error) throw error;
+        
+        // Update local state
         setProducts([...products, editingProduct]);
+      }
+      
+      // Also update ContentContext
+      await updateContent('products', isEditing 
+        ? products.map(p => p.id === editingProduct.id ? editingProduct : p)
+        : [...products, editingProduct]
+      );
+      
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+      alert('Produto salvo com sucesso!');
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Erro ao salvar produto. Tente novamente.');
     }
-    setIsProductModalOpen(false);
-    setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (id: string) => {
-      if(confirm('Tem certeza que deseja excluir este produto?')) {
-          setProducts(products.filter(p => p.id !== id));
-      }
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+    
+    try {
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      const newProducts = products.filter(p => p.id !== id);
+      setProducts(newProducts);
+      
+      // Update ContentContext
+      await updateContent('products', newProducts);
+      
+      alert('Produto excluído com sucesso!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Erro ao excluir produto. Tente novamente.');
+    }
+  };
+
+  // --- Leads Handlers ---
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ read: true })
+        .eq('id', id);
+      
+      if (error) throw error;
+      setLeads(leads.map(l => l.id === id ? { ...l, read: true } : l));
+    } catch (error) {
+      console.error('Error marking lead as read:', error);
+      alert('Erro ao marcar como lido');
+    }
+  };
+
+  const handleDeleteLead = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este lead?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      setLeads(leads.filter(l => l.id !== id));
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      alert('Erro ao excluir lead');
+    }
   };
 
   const filteredInventory = products.filter(p => 
@@ -265,6 +401,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'inventory' ? 'bg-brand-red text-white shadow-lg shadow-red-900/20 border border-transparent' : 'text-gray-400 hover:bg-white/5 border border-transparent'}`}
            >
              <Box className="w-5 h-5" /> Estoque (Produtos)
+           </button>
+           <button 
+             onClick={() => setActiveTab('leads')}
+             className={`w-full flex items-center justify-between gap-3 p-4 rounded-xl transition-all ${activeTab === 'leads' ? 'bg-brand-red text-white shadow-lg shadow-red-900/20 border border-transparent' : 'text-gray-400 hover:bg-white/5 border border-transparent'}`}
+           >
+             <div className="flex items-center gap-3">
+               <Mail className="w-5 h-5" /> Leads (Contatos)
+             </div>
+             {leads.filter(l => !l.read).length > 0 && (
+               <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                 {leads.filter(l => !l.read).length}
+               </span>
+             )}
            </button>
            <button 
              onClick={() => setActiveTab('categories')}
@@ -382,6 +531,92 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                     )}
                 </div>
+             </div>
+           )}
+
+           {activeTab === 'leads' && (
+             <div className="space-y-6 animate-fade-in-up">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold flex items-center gap-2"><Mail className="text-brand-red"/> Leads de Contato</h2>
+                    <button 
+                        onClick={fetchLeads}
+                        disabled={loadingLeads}
+                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg transition-colors text-sm"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loadingLeads ? 'animate-spin' : ''}`} />
+                        Atualizar
+                    </button>
+                </div>
+
+                {loadingLeads ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-brand-red" />
+                    </div>
+                ) : leads.length === 0 ? (
+                    <div className="text-center py-20 text-gray-500">
+                        <Mail className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                        <p>Nenhum lead recebido ainda.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                        {leads.map(lead => (
+                            <div 
+                                key={lead.id} 
+                                className={`bg-white/5 border rounded-xl p-5 transition-all ${
+                                    lead.read ? 'border-white/5' : 'border-brand-red/30 bg-brand-red/5'
+                                }`}
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex-grow">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className="font-bold text-white text-lg">{lead.name}</h3>
+                                            {!lead.read && (
+                                                <span className="bg-brand-red text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                                    NOVO
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                                            <span className="flex items-center gap-1">
+                                                <Phone className="w-3 h-3" />
+                                                {lead.phone}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Mail className="w-3 h-3" />
+                                                {lead.email}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(lead.created_at).toLocaleString('pt-BR')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {!lead.read && (
+                                            <button 
+                                                onClick={() => handleMarkAsRead(lead.id)}
+                                                className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500 hover:text-white transition-colors"
+                                                title="Marcar como lido"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => handleDeleteLead(lead.id)}
+                                            className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                                            title="Excluir lead"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="bg-black/30 rounded-lg p-3 mt-3">
+                                    <p className="text-sm text-gray-300 leading-relaxed">{lead.message}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
              </div>
            )}
 

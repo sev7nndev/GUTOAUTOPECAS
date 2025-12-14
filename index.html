@@ -4,15 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Guto Auto Peças | Nacionais & Imports</title>
-    <meta name="description" content="Sua melhor escolha em auto peças nacionais e importadas no Rio de Janeiro." />
-    
+    <meta
+      name="description"
+      content="Sua melhor escolha em auto peças nacionais e importadas no Rio de Janeiro."
+    />
+
     <!-- Performance Optimizations -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://maps.google.com">
-    <link rel="dns-prefetch" href="https://upload.wikimedia.org">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://maps.google.com" />
+    <link rel="dns-prefetch" href="https://upload.wikimedia.org" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -21,51 +24,60 @@
           extend: {
             colors: {
               brand: {
-                red: '#D90429',
-                darkRed: '#8D0801',
-                dark: '#050505', // Kept for footer
-                charcoal: '#111111',
-                gray: '#F4F4F5',
-                silver: '#E5E7EB',
-                offWhite: '#F9FAFB',
-              }
+                red: "#D90429",
+                darkRed: "#8D0801",
+                dark: "#050505", // Kept for footer
+                charcoal: "#111111",
+                gray: "#F4F4F5",
+                silver: "#E5E7EB",
+                offWhite: "#F9FAFB",
+              },
             },
             fontFamily: {
-              sans: ['"Exo 2"', 'sans-serif'], // Updated to Exo 2
-              body: ['Inter', 'sans-serif'],
+              sans: ['"Exo 2"', "sans-serif"], // Updated to Exo 2
+              body: ["Inter", "sans-serif"],
             },
             animation: {
-              scroll: 'scroll 80s linear infinite',
-              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              scroll: "scroll 80s linear infinite",
+              "fade-in-up": "fadeInUp 0.8s ease-out forwards",
+              "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
             },
             keyframes: {
               scroll: {
-                '0%': { transform: 'translateX(0)' },
-                '100%': { transform: 'translateX(-50%)' },
+                "0%": { transform: "translateX(0)" },
+                "100%": { transform: "translateX(-50%)" },
               },
               fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
             },
             boxShadow: {
-              'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-              'neon': '0 0 20px rgba(217, 4, 41, 0.5)',
-            }
-          }
-        }
-      }
+              soft: "0 10px 40px -10px rgba(0,0,0,0.08)",
+              neon: "0 0 20px rgba(217, 4, 41, 0.5)",
+            },
+          },
+        },
+      };
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background-color: #ffffff;
         color: #1f2937;
       }
-      h1, h2, h3, h4, h5, h6, .font-heading {
-        font-family: 'Exo 2', sans-serif;
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .font-heading {
+        font-family: "Exo 2", sans-serif;
       }
       /* Hide scrollbar for cleaner UI */
       .no-scrollbar::-webkit-scrollbar {
@@ -76,21 +88,22 @@
         scrollbar-width: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-    "react": "https://esm.sh/react@18.2.0",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "vite": "https://esm.sh/vite@^7.2.7",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+      {
+        "imports": {
+          "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+          "react": "https://esm.sh/react@18.2.0",
+          "react/": "https://esm.sh/react@18.2.0/",
+          "react-dom": "https://esm.sh/react-dom@18.2.0",
+          "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+          "vite": "https://esm.sh/vite@^7.2.7",
+          "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+        }
+      }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Logo } from './Logo';
 import { useContent } from '../contexts/ContentContext';
+import SearchBar from './SearchBar';
 
 interface NavbarProps {
   onNavigate: (page: string) => void;
@@ -70,7 +71,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-8 items-center">
+          <div className="hidden md:flex space-x-4 items-center">
+            <SearchBar onSearch={(term) => onNavigate('catalog')} />
             {navLinks.map((link) => (
               <a
                 key={link.name}

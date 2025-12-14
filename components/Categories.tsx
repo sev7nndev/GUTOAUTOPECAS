@@ -21,8 +21,10 @@ const Categories: React.FC<CategoriesProps> = ({ onCategoryClick }) => {
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-end mb-10">
-           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">O que você <br/><span className="text-brand-red">Procura?</span></h2>
+        <div className="flex justify-center items-center mb-10">
+           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight text-center">O que você <span className="text-brand-red">Procura?</span></h2>
+        </div>
+        <div className="flex justify-end mb-4">
            <button 
              onClick={() => onCategoryClick && onCategoryClick('Todos')}
              className="hidden md:inline-flex items-center text-sm font-bold text-gray-500 hover:text-brand-red transition-colors"

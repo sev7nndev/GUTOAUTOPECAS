@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BRANDS, FEATURES, INITIAL_PRODUCTS } from '../constants';
 import { Category } from '../types';
+import { supabase } from '../lib/supabase';
 
 // Default categories with IDs
 const DEFAULT_CATEGORIES: Category[] = [
@@ -50,80 +51,145 @@ type ContentType = typeof defaultContent;
 
 interface ContentContextType {
   content: ContentType;
-  updateContent: (section: keyof ContentType, data: any) => void;
-  resetContent: () => void;
+  loading: boolean;
+  updateContent: (section: keyof ContentType, data: any) => Promise<void>;
+  resetContent: () => Promise<void>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Use lazy initialization for state to ensure we get localStorage data immediately
-  // before the first render.
-  const [content, setContent] = useState<ContentType>(() => {
-    const saved = localStorage.getItem('site_content');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        
-        // DEEP MERGE STRATEGY:
-        // We merge sub-objects explicitly to ensure saved data overrides defaults,
-        // but missing keys in saved data (from older versions) fallback to defaults.
-        return { 
-          ...defaultContent, 
-          ...parsed,
-          hero: { ...defaultContent.hero, ...(parsed.hero || {}) },
-          logo: { ...defaultContent.logo, ...(parsed.logo || {}) },
-          contact: { ...defaultContent.contact, ...(parsed.contact || {}) },
-          about: { 
-            ...defaultContent.about, 
-            ...(parsed.about || {}),
-            images: parsed.about?.images?.length ? parsed.about.images : defaultContent.about.images
-          },
-          // For Arrays, usually if the user has saved data, we want that EXACT list, 
-          // not a merge, otherwise we might duplicate items.
-          products: parsed.products && parsed.products.length > 0 ? parsed.products : defaultContent.products,
-          categories: parsed.categories && parsed.categories.length > 0 ? parsed.categories : defaultContent.categories,
-          brands: parsed.brands && parsed.brands.length > 0 ? parsed.brands : defaultContent.brands
-        };
-      } catch (e) {
-        console.error("Failed to parse saved content", e);
-        return defaultContent;
+  const [content, setContent] = useState<ContentType>(defaultContent);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch all data from Supabase on mount
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      // Fetch site_content sections
+      const { data: siteData } = await supabase
+        .from('site_content')
+        .select('*');
+
+      // Fetch products
+      const { data: productsData } = await supabase
+        .from('products')
+        .select('*');
+
+      // Fetch categories
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('*')
+        .order('display_order');
+
+      // Fetch brands
+      const { data: brandsData } = await supabase
+        .from('brands')
+        .select('*')
+        .order('display_order');
+
+      // Build content object
+      const newContent = { ...defaultContent };
+
+      // Process site_content sections
+      if (siteData) {
+        siteData.forEach((row: any) => {
+          if (row.section === 'hero') newContent.hero = { ...defaultContent.hero, ...row.data };
+          if (row.section === 'contact') newContent.contact = { ...defaultContent.contact, ...row.data };
+          if (row.section === 'logo') newContent.logo = { ...defaultContent.logo, ...row.data };
+          if (row.section === 'about') newContent.about = { ...defaultContent.about, ...row.data };
+        });
       }
+
+      // Set products, categories, brands
+      if (productsData && productsData.length > 0) newContent.products = productsData;
+      if (categoriesData && categoriesData.length > 0) newContent.categories = categoriesData;
+      if (brandsData && brandsData.length > 0) newContent.brands = brandsData;
+
+      setContent(newContent);
+    } catch (error) {
+      console.error('Error fetching data from Supabase:', error);
+    } finally {
+      setLoading(false);
     }
-    return defaultContent;
-  });
-
-  const updateContent = (section: keyof ContentType, data: any) => {
-    setContent((prev) => {
-      let updatedSectionData;
-      
-      // If data is an array (like brands or products), replace it entirely.
-      // Otherwise merge it with existing section data.
-      if (Array.isArray(data)) {
-        updatedSectionData = data;
-      } else {
-        updatedSectionData = { ...prev[section], ...data };
-      }
-
-      const newContent = {
-        ...prev,
-        [section]: updatedSectionData
-      };
-
-      // Persist to local storage immediately
-      localStorage.setItem('site_content', JSON.stringify(newContent));
-      
-      return newContent;
-    });
   };
 
-  const resetContent = () => {
-    setContent(defaultContent);
-    localStorage.removeItem('site_content');
+  const updateContent = async (section: keyof ContentType, data: any) => {
+    try {
+      // Update local state immediately for responsiveness
+      setContent((prev) => {
+        const updatedSectionData = Array.isArray(data) ? data : { ...prev[section], ...data };
+        return {
+          ...prev,
+          [section]: updatedSectionData
+        };
+      });
+
+      // Save to Supabase based on section type
+      if (section === 'products') {
+        // Handle products - delete all and re-insert
+        await supabase.from('products').delete().neq('id', '');
+        if (data.length > 0) {
+          await supabase.from('products').insert(data);
+        }
+      } else if (section === 'categories') {
+        // Handle categories - delete all and re-insert
+        await supabase.from('categories').delete().neq('id', '');
+        if (data.length > 0) {
+          await supabase.from('categories').insert(data);
+        }
+      } else if (section === 'brands') {
+        // Handle brands - delete all and re-insert
+        await supabase.from('brands').delete().neq('id', '');
+        if (data.length > 0) {
+          await supabase.from('brands').insert(data);
+        }
+      } else if (['hero', 'contact', 'logo', 'about'].includes(section)) {
+        // Handle site_content sections - upsert
+        await supabase
+          .from('site_content')
+          .upsert({ section, data }, { onConflict: 'section' });
+      }
+    } catch (error) {
+      console.error(`Error updating ${section}:`, error);
+      // Revert local state on error
+      await fetchAllData();
+    }
+  };
+
+  const resetContent = async () => {
+    try {
+      // Reset all tables to defaults
+      await supabase.from('products').delete().neq('id', '');
+      await supabase.from('categories').delete().neq('id', '');
+      await supabase.from('brands').delete().neq('id', '');
+      
+      // Reset site_content
+      await supabase.from('site_content').upsert([
+        { section: 'hero', data: defaultContent.hero },
+        { section: 'contact', data: defaultContent.contact },
+        { section: 'logo', data: defaultContent.logo },
+        { section: 'about', data: defaultContent.about }
+      ], { onConflict: 'section' });
+
+      // Insert defaults
+      await supabase.from('products').insert(INITIAL_PRODUCTS);
+      await supabase.from('categories').insert(DEFAULT_CATEGORIES);
+      await supabase.from('brands').insert(BRANDS);
+
+      // Refresh data
+      await fetchAllData();
+    } catch (error) {
+      console.error('Error resetting content:', error);
+    }
   };
 
   return (
-    <ContentContext.Provider value={{ content, updateContent, resetContent }}>
+    <ContentContext.Provider value={{ content, loading, updateContent, resetContent }}>
       {children}
     </ContentContext.Provider>
   );

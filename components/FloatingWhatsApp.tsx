@@ -1,27 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useContent } from '../contexts/ContentContext';
 
 const FloatingWhatsApp: React.FC = () => {
   const { content } = useContent();
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const message = `Olá! Vim pelo site da Guto Auto Peças e gostaria de:
+%0A• Solicitar um orçamento
+%0A• Verificar disponibilidade de peças
+%0A• Tirar uma dúvida`;
 
   return (
-    <a 
-      href={`https://wa.me/${content.contact.whatsapp}?text=Ol%C3%A1%2C%20estou%20no%20site%20da%20Guto%20Auto%20Pe%C3%A7as%20e%20gostaria%20de%20um%20or%C3%A7amento.`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 group"
-    >
-      <span className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-x-4 group-hover:translate-x-0 hidden md:block">
-        Fale conosco agora!
-      </span>
-      <div className="relative">
-         <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping"></span>
-         <div className="relative w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg shadow-green-900/50 hover:bg-green-500 transition-colors duration-300">
-            <MessageCircle className="w-8 h-8 text-white fill-white" />
-         </div>
-      </div>
-    </a>
+    <div className="fixed bottom-6 right-6 z-50">
+      <a 
+        href={`https://wa.me/${content.contact.whatsapp}?text=${message}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 group"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {/* Tooltip */}
+        <div className={`bg-white text-black px-4 py-2 rounded-lg text-sm font-bold shadow-xl border border-gray-200 transition-all duration-300 ${showTooltip ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'} hidden md:block`}>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span>Fale conosco no WhatsApp!</span>
+          </div>
+        </div>
+
+        {/* Button */}
+        <div className="relative">
+          {/* Pulse animation */}
+          <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping"></span>
+          
+          {/* Online badge */}
+          <div className="absolute -top-1 -right-1 z-10">
+            <span className="flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
+            </span>
+          </div>
+
+          {/* Main button */}
+          <div className="relative w-16 h-16 bg-gradient-to-br from-[#25D366] to-[#128C7E] rounded-full flex items-center justify-center shadow-2xl shadow-green-900/50 hover:scale-110 hover:shadow-green-500/50 transition-all duration-300 cursor-pointer">
+            <MessageCircle className="w-9 h-9 text-white fill-white animate-pulse" />
+          </div>
+        </div>
+      </a>
+    </div>
   );
 };
 

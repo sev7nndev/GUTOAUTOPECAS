@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BRANCHES } from '../constants';
-import { MapPin, Send, ExternalLink, Loader2, CheckCircle2, Phone, Clock } from 'lucide-react';
+import { MapPin, Send, ExternalLink, Loader2, CheckCircle2, Phone, Clock, XCircle } from 'lucide-react';
 import { useContent } from '../contexts/ContentContext';
+import { supabase } from '../lib/supabase';
 
 const Contact: React.FC = () => {
   const { content } = useContent();
@@ -12,7 +13,8 @@ const Contact: React.FC = () => {
     message: ''
   });
   
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -28,14 +30,33 @@ const Contact: React.FC = () => {
     setFormData(prev => ({ ...prev, phone: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    setTimeout(() => {
+    setErrorMessage('');
+
+    try {
+      // Insert lead into Supabase
+      const { error } = await supabase
+        .from('leads')
+        .insert([{
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          message: formData.message
+        }]);
+
+      if (error) throw error;
+
       setStatus('success');
       setFormData({ name: '', phone: '', email: '', message: '' });
       setTimeout(() => setStatus('idle'), 5000);
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error saving lead:', error);
+      setStatus('error');
+      setErrorMessage(error.message || 'Erro ao enviar mensagem. Tente novamente.');
+      setTimeout(() => setStatus('idle'), 5000);
+    }
   };
 
   const getDynamicAddress = (index: number) => {
@@ -77,7 +98,7 @@ const Contact: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           
           {/* Form Area - Dark Glass Card */}
-          <div className="lg:col-span-5 bg-[#111] border border-white/10 p-8 md:p-10 rounded-3xl shadow-2xl relative group h-full hover:border-brand-red/30 transition-colors duration-500">
+           <div className="lg:col-span-5 bg-[#111] border border-white/10 p-8 md:p-10 rounded-3xl shadow-2xl relative group h-full hover:border-brand-red/30 transition-colors duration-500">
              
              {status === 'success' ? (
                 <div className="relative z-10 flex flex-col items-center justify-center h-full text-center py-20 animate-fade-in-up">
@@ -91,6 +112,20 @@ const Contact: React.FC = () => {
                     className="mt-8 px-6 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold transition-colors border border-white/10"
                   >
                     Enviar nova mensagem
+                  </button>
+                </div>
+             ) : status === 'error' ? (
+                <div className="relative z-10 flex flex-col items-center justify-center h-full text-center py-20 animate-fade-in-up">
+                  <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
+                    <XCircle className="w-12 h-12 text-red-500" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-white mb-2">Erro ao Enviar</h3>
+                  <p className="text-gray-400 mb-4">{errorMessage}</p>
+                  <button 
+                    onClick={() => setStatus('idle')}
+                    className="mt-4 px-6 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold transition-colors border border-white/10"
+                  >
+                    Tentar novamente
                   </button>
                 </div>
              ) : (

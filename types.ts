@@ -31,3 +31,14 @@ export interface Category {
   icon: string; // Icon name from lucide-react
   image: string;
 }
+
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  created_at: string;
+  read: boolean;
+}
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ContentProvider } from './contexts/ContentContext';
+import { ContentProvider, useContent } from './contexts/ContentContext';
 import TopBar from './components/TopBar';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -13,9 +13,11 @@ import Categories from './components/Categories';
 import CatalogPage from './components/CatalogPage';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import AdminDashboard from './components/AdminDashboard';
-import { Lock } from 'lucide-react';
+import Testimonials from './components/Testimonials';
+import { Lock, Loader2 } from 'lucide-react';
 
 function AppContent() {
+  const { loading } = useContent();
   const [currentPage, setCurrentPage] = useState<'home' | 'budget' | 'admin' | 'login' | 'catalog'>('home');
   const [catalogFilters, setCatalogFilters] = useState({ category: 'Todos', search: '' });
   const [password, setPassword] = useState('');
@@ -51,6 +53,18 @@ function AppContent() {
       alert('Senha incorreta');
     }
   };
+
+  // Show loading screen while fetching data from Supabase
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 text-brand-red animate-spin mx-auto mb-4" />
+          <p className="text-white text-xl">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (currentPage === 'login') {
     return (
@@ -118,6 +132,7 @@ function AppContent() {
             <Categories onCategoryClick={(cat) => navigateTo('catalog', { category: cat })} />
             <Features />
             <About />
+            <Testimonials />
             <Contact />
           </>
         ) : (
