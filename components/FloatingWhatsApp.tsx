@@ -11,10 +11,14 @@ const FloatingWhatsApp: React.FC = () => {
 %0A• Verificar disponibilidade de peças
 %0A• Tirar uma dúvida`;
 
+  // Remove all non-numeric characters and add Brazil country code
+  const phoneNumber = content.contact.whatsapp.replace(/\D/g, '');
+  const formattedPhone = phoneNumber.startsWith('55') ? phoneNumber : `55${phoneNumber}`;
+
   return (
     <div className="fixed bottom-6 right-6 z-50">
       <a 
-        href={`https://wa.me/${content.contact.whatsapp}?text=${message}`}
+        href={`https://wa.me/${formattedPhone}?text=${message}`}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-3 group"
