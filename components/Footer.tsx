@@ -83,24 +83,26 @@ const Footer: React.FC<FooterProps> = React.memo(({ onAdminClick }) => {
           </div>
 
           {/* Facebook Widget */}
-          <div className="lg:col-span-1">
-             <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-               <span className="w-1 h-6 bg-brand-red rounded-full"></span>
+          <div className="bg-gray-900 rounded-2xl p-6 border border-white/5">
+            <div className="flex items-center gap-2 mb-4">
+              <Facebook className="w-5 h-5 text-[#1877F2]" />
+              <h4 className="font-bold text-white">
                Facebook
-             </h4>
-             <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full max-w-[340px]">
-                <iframe 
+              </h4>
+            </div>
+            <div className="rounded-lg overflow-hidden">
+              <iframe 
                   src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fgutoautopecas&tabs=timeline&width=340&height=250&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" 
                   width="100%" 
                   height="250" 
                   style={{border:'none', overflow:'hidden'}} 
                   scrolling="no" 
                   frameBorder="0" 
-                  allowFullScreen={true} 
-                  loading="lazy"
+                  allowFullScreen={true}
                   allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  referrerPolicy="no-referrer-when-downgrade"
                   title="Facebook Page Preview"
-                ></iframe>
+              ></iframe>
              </div>
           </div>
 
