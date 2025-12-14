@@ -16,7 +16,7 @@ const Footer: React.FC<FooterProps> = React.memo(({ onAdminClick }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           
           {/* Brand Column */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 flex flex-col items-center lg:items-start">
              <a href="#" className="inline-block">
                 {content.logo && content.logo.url ? (
                   <img src={content.logo.url} alt="Logo Guto Auto Peças" className="h-48 w-auto object-contain" loading="lazy" />
@@ -24,7 +24,7 @@ const Footer: React.FC<FooterProps> = React.memo(({ onAdminClick }) => {
                   <Logo className="h-32 w-auto" />
                 )}
              </a>
-             <p className="text-gray-500 text-sm leading-relaxed">
+             <p className="text-gray-500 text-sm leading-relaxed text-center lg:text-left">
                Desde 1999, sua referência em peças nacionais e importadas no Rio de Janeiro. Qualidade, confiança e preço justo em um só lugar.
              </p>
              <div className="flex gap-4 pt-2">
