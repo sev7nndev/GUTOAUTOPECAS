@@ -127,7 +127,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ initialCategory = 'Todos', in
                      <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                         <span className="text-xl font-black text-gray-900">{product.price}</span>
                         <a 
-                          href={`https://wa.me/${content.contact.whatsapp}?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20produto%3A%20${encodeURIComponent(product.name)}`}
+                          href={`https://wa.me/${content.contact.whatsapp.replace(/\D/g, '').startsWith('55') ? content.contact.whatsapp.replace(/\D/g, '') : '55' + content.contact.whatsapp.replace(/\D/g, '')}?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20produto%3A%20${encodeURIComponent(product.name)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm transition-colors shadow-lg shadow-green-500/20"
