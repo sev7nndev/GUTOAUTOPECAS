@@ -24,7 +24,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="relative min-h-[90vh] flex items-center bg-[#050505] overflow-hidden">
+    <div className="relative min-h-[70vh] md:min-h-[85vh] flex items-center bg-[#050505] overflow-hidden">
       {/* Dynamic Background */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -42,7 +42,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
       <div className="absolute top-0 right-0 w-[600px] h-full border-l border-white/5 bg-white/[0.02] transform skew-x-12 origin-top hidden lg:block"></div>
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-red to-transparent opacity-50"></div>
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-10">
         <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
           
           {/* Badge */}
