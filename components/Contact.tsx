@@ -313,7 +313,7 @@ const Contact: React.FC = () => {
                           : '/mapa-guto-imports.png'
                         }
                         alt={`Mapa ${branch.name}`}
-                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                        className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
                         loading="lazy"
                       />
                       {/* Overlay with location info */}
