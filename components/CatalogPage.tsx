@@ -103,7 +103,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ initialCategory = 'Todos', in
                        alt={product.name}
                        loading="lazy" 
                        decoding="async"
-                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 bg-white"
                        onError={(e) => (e.currentTarget.src = "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=400")} 
                      />
                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">

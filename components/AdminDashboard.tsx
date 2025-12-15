@@ -72,6 +72,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
   const [loadingCarousel, setLoadingCarousel] = useState(false);
   
+  // Category Creation State
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   // --- Synchronization Effect ---
@@ -363,6 +367,48 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     } catch (error) {
       console.error('Error deleting product:', error);
       alert('Erro ao excluir produto. Tente novamente.');
+    }
+  };
+
+  // Handle Create New Category
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      alert('Digite um nome para a categoria!');
+      return;
+    }
+
+    try {
+      const newCategory: Category = {
+        id: crypto.randomUUID(),
+        name: newCategoryName.trim(),
+        icon: 'Box',
+        image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=400',
+      };
+
+      // Insert in Supabase
+      const { error } = await supabase
+        .from('categories')
+        .insert(newCategory);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedCategories = [...tempCategories, newCategory];
+      setTempCategories(updatedCategories);
+      
+      // Update product with new category
+      if (editingProduct) {
+        setEditingProduct({...editingProduct, category: newCategoryName.trim()});
+      }
+
+      // Close modal
+      setIsCreatingCategory(false);
+      setNewCategoryName('');
+      
+      alert('Categoria criada com sucesso!');
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert('Erro ao criar categoria. Tente novamente.');
     }
   };
 
@@ -1095,9 +1141,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-400 uppercase">Categoria</label>
-                            <select value={editingProduct.category} onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-brand-red outline-none appearance-none">
-                                {CATEGORIES_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            <div className="flex gap-2">
+                                <select value={editingProduct.category} onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})} className="flex-grow bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-brand-red outline-none appearance-none">
+                                    {CATEGORIES_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                                    {tempCategories.filter(cat => !CATEGORIES_OPTIONS.includes(cat.name)).map(cat => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCreatingCategory(true)}
+                                    className="px-3 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500 hover:text-white transition-colors flex items-center justify-center"
+                                    title="Criar nova categoria"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-400 uppercase">Marca</label>
@@ -1150,6 +1209,49 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 <div className="mt-6 pt-4 border-t border-white/10 flex justify-end gap-3">
                     <button onClick={() => setIsProductModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white">Cancelar</button>
                     <button onClick={handleSaveProduct} className="bg-brand-red hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold">Salvar Produto</button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* Category Creation Modal */}
+      {isCreatingCategory && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+            <div className="bg-brand-dark border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                <h3 className="text-xl font-bold text-white mb-4">Nova Categoria</h3>
+                
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase">Nome da Categoria</label>
+                        <input 
+                            type="text" 
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white focus:border-brand-red outline-none" 
+                            placeholder="Ex: Pneus" 
+                            autoFocus
+                        />
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-white/10 flex justify-end gap-3">
+                    <button 
+                        onClick={() => {
+                            setIsCreatingCategory(false);
+                            setNewCategoryName('');
+                        }} 
+                        className="px-4 py-2 text-gray-400 hover:text-white"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={handleCreateCategory} 
+                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Criar Categoria
+                    </button>
                 </div>
             </div>
         </div>
