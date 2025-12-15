@@ -45,12 +45,25 @@ function AppContent() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'guto123') { // Simple client-side protection
+    
+    // Hash the password using SHA-256
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    // Compare with the hashed password (gutoadmin26)
+    const correctHash = 'a20401f9b531b404c6decff28f3ba43b46458dd6925917353941d0eeea0cb573';
+    
+    if (hashHex === correctHash) {
       setCurrentPage('admin');
+      setPassword(''); // Clear password from memory
     } else {
       alert('Senha incorreta');
+      setPassword(''); // Clear password from memory
     }
   };
 
@@ -78,7 +91,7 @@ function AppContent() {
            <h2 className="text-2xl font-bold text-white text-center mb-6">Acesso Administrativo</h2>
            <input 
              type="password" 
-             placeholder="Digite a senha (guto123)" 
+             placeholder="Digite a senha" 
              value={password}
              onChange={(e) => setPassword(e.target.value)}
              className="w-full bg-black/40 border border-white/20 rounded-xl p-4 text-white mb-4 focus:border-brand-red outline-none"

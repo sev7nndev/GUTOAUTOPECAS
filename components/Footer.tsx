@@ -82,28 +82,61 @@ const Footer: React.FC<FooterProps> = React.memo(({ onAdminClick }) => {
              </ul>
           </div>
 
-          {/* Facebook Widget */}
-          <div className="bg-gray-900 rounded-2xl p-6 border border-white/5">
-            <div className="flex items-center gap-2 mb-4">
-              <Facebook className="w-5 h-5 text-[#1877F2]" />
-              <h4 className="font-bold text-white">
-               Facebook
-              </h4>
+          {/* Facebook Card - Enhanced */}
+          <div className="bg-gray-900 rounded-2xl overflow-hidden border border-white/5 hover:border-[#1877F2]/30 transition-all duration-300 group/fb">
+            {/* Facebook Header */}
+            <div className="bg-gradient-to-r from-[#1877F2] to-[#1664d8] p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                  <Facebook className="w-7 h-7 text-[#1877F2]" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Guto Auto Peças</h4>
+                  <p className="text-blue-100 text-xs">@gutoautopecas</p>
+                </div>
+              </div>
             </div>
-            <div className="rounded-lg overflow-hidden">
-              <iframe 
-                  src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fgutoautopecas&tabs=timeline&width=340&height=250&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" 
-                  width="100%" 
-                  height="250" 
-                  style={{border:'none', overflow:'hidden'}} 
-                  scrolling="no" 
-                  frameBorder="0" 
-                  allowFullScreen={true}
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Facebook Page Preview"
-              ></iframe>
-             </div>
+            
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              {/* Preview Image */}
+              <div className="relative rounded-lg overflow-hidden bg-gray-800 h-32">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <Facebook className="w-12 h-12 text-gray-600 mx-auto" />
+                    <p className="text-gray-500 text-sm font-medium">Siga nossa página</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Description */}
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Acompanhe nossas novidades, promoções exclusivas e dicas automotivas!
+              </p>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3 py-3 border-t border-white/5">
+                <div className="text-center">
+                  <p className="text-white font-bold text-lg">20+</p>
+                  <p className="text-gray-500 text-xs">Anos</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-bold text-lg">2</p>
+                  <p className="text-gray-500 text-xs">Lojas</p>
+                </div>
+              </div>
+              
+              {/* CTA Button */}
+              <a 
+                href="https://www.facebook.com/gutoautopecas" 
+                target="_blank" 
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#1877F2] hover:bg-[#1664d8] text-white font-bold rounded-lg transition-all duration-300 group-hover/fb:scale-[1.02] shadow-lg"
+              >
+                <Facebook className="w-5 h-5" />
+                Visitar Página
+              </a>
+            </div>
           </div>
 
         </div>

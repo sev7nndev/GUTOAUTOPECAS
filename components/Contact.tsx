@@ -65,11 +65,23 @@ const Contact: React.FC = () => {
     return "";
   };
 
-  const getMapUrl = (index: number) => {
-    const address = getDynamicAddress(index);
-    const query = encodeURIComponent(`${address}, Rio de Janeiro - RJ`);
-    // Added dark mode parameter to map styling if supported, though iframe content styling is limited by Google
-    return `https://maps.google.com/maps?q=${query}&t=m&z=16&output=embed&iwloc=near`;
+  // URLs diretas do Google Maps para cada filial
+  const getGoogleMapsUrl = (index: number) => {
+    const urls = [
+      "https://www.google.com/maps/place/R.+Picu%C3%AD,+869+-+Bento+Ribeiro,+Rio+de+Janeiro+-+RJ,+21550-400/@-22.8577943,-43.3563573,17z/data=!3m1!4b1!4m6!3m5!1s0x99631a21afcb2f:0xfde9f7802b02a346!8m2!3d-22.8577993!4d-43.3537824!16s%2Fg%2F11c5bvg61j?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoASAFQAw%3D%3D",
+      "https://www.google.com/maps/place/Largo+do+Sap%C3%A9,+75+-+Bento+Ribeiro,+Rio+de+Janeiro+-+RJ,+21550-380/@-22.8569138,-43.3564123,17z/data=!3m1!4b1!4m6!3m5!1s0x99631a03a08227:0x2a9434ebd70d57cf!8m2!3d-22.8569188!4d-43.3538374!16s%2Fg%2F11c43stx9_?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoASAFQAw%3D%3D"
+    ];
+    return urls[index];
+  };
+
+  // Imagem estática do mapa (não precisa de API key)
+  const getStaticMapImage = (index: number) => {
+    const coordinates = [
+      { lat: -22.8577993, lon: -43.3537824 }, // Bento Ribeiro - Rua Picuí, 869
+      { lat: -22.8569188, lon: -43.3538374 }  // Rocha Miranda - Largo do Sapê, 75
+    ];
+    const coord = coordinates[index];
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${coord.lat},${coord.lon}&zoom=16&size=600x400&markers=color:red%7C${coord.lat},${coord.lon}&style=feature:poi%7Cvisibility:off&key=AIzaSyDummy`;
   };
 
   return (
@@ -269,32 +281,44 @@ const Contact: React.FC = () => {
                    </div>
 
                    <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getDynamicAddress(idx))}`}
+                      href={getGoogleMapsUrl(idx)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-8 flex items-center justify-center gap-2 w-full py-3.5 bg-white/5 hover:bg-brand-red hover:text-white text-white text-sm font-bold rounded-xl border border-white/10 hover:border-brand-red transition-all duration-300 group/btn shadow-lg"
+                      className="mt-8 flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-brand-red to-red-700 hover:from-red-600 hover:to-red-800 text-white text-sm font-bold rounded-xl border border-brand-red/20 hover:border-brand-red transition-all duration-300 group/btn shadow-lg"
                    >
                       <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                       Abrir no Google Maps
                    </a>
                 </div>
 
-                {/* Map Section */}
-                <div className="md:w-7/12 min-h-[250px] relative bg-zinc-900 border-l border-white/5">
-                    {/* Map Overlay to darken it slightly for theme consistency before interaction */}
-                    <div className="absolute inset-0 bg-black/10 pointer-events-none z-10 mix-blend-multiply"></div>
-                    <iframe 
-                        src={getMapUrl(idx)} 
-                        width="100%" 
-                        height="100%" 
-                        style={{border:0, filter: 'contrast(1.1) saturate(1.1)'}} 
-                        allowFullScreen={true} 
+                {/* Map Section - Clickable */}
+                <a 
+                  href={getGoogleMapsUrl(idx)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="md:w-7/12 min-h-[250px] relative bg-zinc-900 border-l border-white/5 group/map overflow-hidden cursor-pointer"
+                >
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/map:opacity-100 transition-opacity duration-300 z-20 flex items-center justify-center">
+                      <div className="bg-brand-red text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-2xl transform scale-90 group-hover/map:scale-100 transition-transform">
+                        <ExternalLink className="w-5 h-5" />
+                        Abrir no Google Maps
+                      </div>
+                    </div>
+                    {/* Map iframe - Google Maps embed (works without API key) */}
+                    <div className="absolute inset-0 w-full h-full">
+                      <iframe
+                        src={`https://maps.google.com/maps?q=${idx === 0 ? '-22.8577993,-43.3537824' : '-22.8569188,-43.3538374'}&hl=pt-BR&z=16&output=embed`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0, pointerEvents: 'none' }}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         title={`Mapa ${branch.name}`}
-                        className="absolute inset-0 w-full h-full grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
-                    ></iframe>
-                </div>
+                        className="w-full h-full grayscale-[0.2] group-hover/map:grayscale-0 transition-all duration-700"
+                      ></iframe>
+                    </div>
+                </a>
               </div>
             ))}
           </div>

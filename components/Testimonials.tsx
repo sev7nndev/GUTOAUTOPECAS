@@ -15,7 +15,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     id: 1,
     name: "Carlos Silva",
-    avatar: "https://ui-avatars.com/api/?name=Carlos+Silva&background=DC2626&color=fff&size=128",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop&crop=faces",
     rating: 5,
     comment: "Atendimento excepcional! Encontrei a peça que precisava para meu Gol e ainda recebi orientação técnica. Preço justo e entrega rápida. Recomendo!",
     date: "Há 2 semanas",
@@ -24,7 +24,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     id: 2,
     name: "Maria Santos",
-    avatar: "https://ui-avatars.com/api/?name=Maria+Santos&background=DC2626&color=fff&size=128",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=128&h=128&fit=crop&crop=faces",
     rating: 5,
     comment: "Já sou cliente há anos. Sempre encontro o que preciso e a equipe é muito atenciosa. Melhor custo-benefício da região!",
     date: "Há 1 mês",
@@ -33,7 +33,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     id: 3,
     name: "João Pedro",
-    avatar: "https://ui-avatars.com/api/?name=Joao+Pedro&background=DC2626&color=fff&size=128",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=128&h=128&fit=crop&crop=faces",
     rating: 5,
     comment: "Precisava de uma peça urgente para meu HB20. Eles tinham em estoque e me atenderam super rápido. Salvaram meu dia!",
     date: "Há 3 dias",
@@ -42,7 +42,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     id: 4,
     name: "Ana Paula",
-    avatar: "https://ui-avatars.com/api/?name=Ana+Paula&background=DC2626&color=fff&size=128",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=128&h=128&fit=crop&crop=faces",
     rating: 5,
     comment: "Excelente variedade de peças tanto nacionais quanto importadas. Preços competitivos e atendimento nota 10!",
     date: "Há 1 semana",
@@ -51,7 +51,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     id: 5,
     name: "Roberto Lima",
-    avatar: "https://ui-avatars.com/api/?name=Roberto+Lima&background=DC2626&color=fff&size=128",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&crop=faces",
     rating: 5,
     comment: "Compro aqui há mais de 10 anos. Confiança total! Peças originais, garantia e um atendimento que faz diferença.",
     date: "Há 2 dias",
