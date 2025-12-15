@@ -305,15 +305,14 @@ const Contact: React.FC = () => {
                         Abrir no Google Maps
                       </div>
                     </div>
-                    {/* Map iframe - Google Maps embed (works without API key) */}
+                    {/* Map iframe - OpenStreetMap (reliable, no API key needed) */}
                     <div className="absolute inset-0 w-full h-full">
                       <iframe
-                        src={`https://maps.google.com/maps?q=${idx === 0 ? '-22.8577993,-43.3537824' : '-22.8569188,-43.3538374'}&hl=pt-BR&z=16&output=embed`}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${idx === 0 ? '-43.3587824,-22.8627993,-43.3487824,-22.8527993' : '-43.3588374,-22.8619188,-43.3488374,-22.8519188'}&layer=mapnik&marker=${idx === 0 ? '-22.8577993,-43.3537824' : '-22.8569188,-43.3538374'}`}
                         width="100%"
                         height="100%"
                         style={{ border: 0, pointerEvents: 'none' }}
                         loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
                         title={`Mapa ${branch.name}`}
                         className="w-full h-full grayscale-[0.2] group-hover/map:grayscale-0 transition-all duration-700"
                       ></iframe>
