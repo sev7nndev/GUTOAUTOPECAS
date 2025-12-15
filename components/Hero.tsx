@@ -78,8 +78,8 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
             alt={`Banner ${index + 1}`} 
             // @ts-ignore
             fetchPriority={index === 0 ? "high" : "low"}
-            className={`absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-1000 ${
-              index === currentImageIndex ? 'opacity-40' : 'opacity-0'
+            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-70' : 'opacity-0'
             }`}
           />
         ))}
