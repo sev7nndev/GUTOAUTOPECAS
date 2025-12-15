@@ -305,17 +305,14 @@ const Contact: React.FC = () => {
                         Abrir no Google Maps
                       </div>
                     </div>
-                    {/* Map iframe - OpenStreetMap (reliable, no API key needed) */}
-                    <div className="absolute inset-0 w-full h-full">
-                      <iframe
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${idx === 0 ? '-43.3587824,-22.8627993,-43.3487824,-22.8527993' : '-43.3588374,-22.8619188,-43.3488374,-22.8519188'}&layer=mapnik&marker=${idx === 0 ? '-22.8577993,-43.3537824' : '-22.8569188,-43.3538374'}`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0, pointerEvents: 'none' }}
+                    {/* Static Map Image - Works everywhere, no CSP issues */}
+                    <div className="absolute inset-0 w-full h-full overflow-hidden">
+                      <img
+                        src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${idx === 0 ? '-43.3537824,-22.8577993' : '-43.3538374,-22.8569188'},15,0/600x400@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`}
+                        alt={`Mapa ${branch.name}`}
+                        className="w-full h-full object-cover grayscale-[0.2] group-hover/map:grayscale-0 transition-all duration-700"
                         loading="lazy"
-                        title={`Mapa ${branch.name}`}
-                        className="w-full h-full grayscale-[0.2] group-hover/map:grayscale-0 transition-all duration-700"
-                      ></iframe>
+                      />
                     </div>
                 </a>
               </div>
