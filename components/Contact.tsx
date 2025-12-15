@@ -309,8 +309,8 @@ const Contact: React.FC = () => {
                     <div className="absolute inset-0 w-full h-full overflow-hidden">
                       <img
                         src={idx === 0 
-                          ? 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80'
-                          : 'https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?w=800&q=80'
+                          ? '/mapa-guto-nacional.png'
+                          : '/mapa-guto-imports.png'
                         }
                         alt={`Mapa ${branch.name}`}
                         className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
