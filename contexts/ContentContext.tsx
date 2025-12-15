@@ -131,11 +131,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       // Save to Supabase based on section type
       if (section === 'products') {
-        // Handle products - delete all and re-insert
-        await supabase.from('products').delete().neq('id', '');
-        if (data.length > 0) {
-          await supabase.from('products').insert(data);
-        }
+        // Products are managed individually in AdminDashboard
+        // Just update local state, don't delete/reinsert
+        // Individual product saves happen in AdminDashboard.handleSaveProduct
+        console.log('Products updated in local state only - managed individually in admin');
       } else if (section === 'categories') {
         // Handle categories - delete all and re-insert
         await supabase.from('categories').delete().neq('id', '');

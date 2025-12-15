@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useContent } from '../contexts/ContentContext';
-import { Save, RefreshCw, LogOut, Layout, Phone, Image, Upload, XCircle, Check, Loader2, Camera, Plus, Trash2, Box, Edit, Search, Layers, Mail, Eye, Clock } from 'lucide-react';
+import { Save, RefreshCw, LogOut, Layout, Phone, Image, Upload, XCircle, Check, Loader2, Camera, Plus, Trash2, Box, Edit, Search, Layers, Mail, Eye, Clock, ArrowUp, ArrowDown } from 'lucide-react';
 import { Product, Category, Lead } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -48,7 +48,7 @@ const compressImage = async (file: File, maxWidth: number = 800): Promise<string
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const { content, updateContent, resetContent } = useContent();
-  const [activeTab, setActiveTab] = useState<'hero' | 'contact' | 'brands' | 'logo' | 'gallery' | 'inventory' | 'categories' | 'leads'>('inventory');
+  const [activeTab, setActiveTab] = useState<'hero' | 'carousel' | 'contact' | 'brands' | 'logo' | 'gallery' | 'inventory' | 'categories' | 'leads'>('inventory');
   
   // Local State for Form Fields
   const [tempHero, setTempHero] = useState(content.hero);
@@ -67,6 +67,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   // Leads State
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
+  
+  // Carousel State
+  const [carouselImages, setCarouselImages] = useState<any[]>([]);
+  const [loadingCarousel, setLoadingCarousel] = useState(false);
   
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
@@ -107,6 +111,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
       // Auto-refresh every 30 seconds
       const interval = setInterval(fetchLeads, 30000);
       return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
+  // --- Fetch Carousel Images from Supabase ---
+  const fetchCarouselImages = async () => {
+    setLoadingCarousel(true);
+    try {
+      const { data, error } = await supabase
+        .from('hero_carousel')
+        .select('*')
+        .order('order_index', { ascending: true });
+      
+      if (error) throw error;
+      setCarouselImages(data || []);
+    } catch (error) {
+      console.error('Error fetching carousel images:', error);
+    } finally {
+      setLoadingCarousel(false);
+    }
+  };
+
+  // Fetch carousel when Carousel tab is active
+  useEffect(() => {
+    if (activeTab === 'carousel') {
+      fetchCarouselImages();
     }
   }, [activeTab]);
 
@@ -350,6 +379,103 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     }
   };
 
+  // --- Carousel Handlers ---
+  const handleAddCarouselImage = async (imageUrl: string) => {
+    try {
+      const maxOrder = carouselImages.length > 0 
+        ? Math.max(...carouselImages.map(img => img.order_index))
+        : 0;
+      
+      const { error } = await supabase
+        .from('hero_carousel')
+        .insert({
+          image_url: imageUrl,
+          order_index: maxOrder + 1,
+          active: true
+        });
+      
+      if (error) throw error;
+      await fetchCarouselImages();
+      alert('Imagem adicionada com sucesso!');
+    } catch (error) {
+      console.error('Error adding carousel image:', error);
+      alert('Erro ao adicionar imagem');
+    }
+  };
+
+  const handleCarouselImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressedBase64 = await compressImage(file, 1920);
+        await handleAddCarouselImage(compressedBase64);
+      } catch (error) {
+        alert("Erro ao processar imagem");
+      }
+    }
+  };
+
+  const handleDeleteCarouselImage = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta imagem?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('hero_carousel')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      await fetchCarouselImages();
+      alert('Imagem excluída com sucesso!');
+    } catch (error) {
+      console.error('Error deleting carousel image:', error);
+      alert('Erro ao excluir imagem');
+    }
+  };
+
+  const handleToggleCarouselImage = async (id: string, currentActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('hero_carousel')
+        .update({ active: !currentActive })
+        .eq('id', id);
+      
+      if (error) throw error;
+      await fetchCarouselImages();
+    } catch (error) {
+      console.error('Error toggling carousel image:', error);
+      alert('Erro ao atualizar status');
+    }
+  };
+
+  const handleReorderCarousel = async (id: string, direction: 'up' | 'down') => {
+    const currentIndex = carouselImages.findIndex(img => img.id === id);
+    if (currentIndex === -1) return;
+    
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= carouselImages.length) return;
+    
+    try {
+      const currentImage = carouselImages[currentIndex];
+      const targetImage = carouselImages[targetIndex];
+      
+      await supabase
+        .from('hero_carousel')
+        .update({ order_index: targetImage.order_index })
+        .eq('id', currentImage.id);
+      
+      await supabase
+        .from('hero_carousel')
+        .update({ order_index: currentImage.order_index })
+        .eq('id', targetImage.id);
+      
+      await fetchCarouselImages();
+    } catch (error) {
+      console.error('Error reordering carousel:', error);
+      alert('Erro ao reordenar');
+    }
+  };
+
   const filteredInventory = products.filter(p => 
     p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
     p.brand.toLowerCase().includes(productSearch.toLowerCase())
@@ -427,6 +553,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
            >
              <Layout className="w-5 h-5" /> Hero & Banner
            </button>
+           <button 
+              onClick={() => setActiveTab('carousel')}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'carousel' ? 'bg-white/10 text-white border border-white/20' : 'text-gray-400 hover:bg-white/5'}`}
+            >
+              <Image className="w-5 h-5" /> Carrossel Hero
+            </button>
            <button 
              onClick={() => setActiveTab('logo')}
              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'logo' ? 'bg-white/10 text-white border border-white/20' : 'text-gray-400 hover:bg-white/5'}`}
@@ -752,6 +884,135 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 </div>
              </div>
            )}
+
+           {activeTab === 'carousel' && (
+              <div className="space-y-6 animate-fade-in-up">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <Image className="text-brand-red"/> Carrossel do Hero
+                  </h2>
+                  <button 
+                    onClick={fetchCarouselImages}
+                    disabled={loadingCarousel}
+                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg transition-colors text-sm"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loadingCarousel ? 'animate-spin' : ''}`} />
+                    Atualizar
+                  </button>
+                </div>
+
+                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg mb-6">
+                  <p className="text-sm text-blue-400">
+                    <strong>Carrossel Automático:</strong> As imagens trocam a cada 2 segundos no Hero. 
+                    Adicione, reordene ou desative imagens conforme necessário.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 p-4 border border-dashed border-white/20 rounded-xl bg-black/20">
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleCarouselImageUpload} 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    />
+                    <button className="bg-brand-red hover:bg-red-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors pointer-events-none">
+                      <Plus className="w-5 h-5" /> Adicionar Imagem
+                    </button>
+                  </div>
+                  <span className="text-gray-500 text-sm">
+                    Selecione uma imagem para adicionar ao carrossel (1920x1080 recomendado)
+                  </span>
+                </div>
+
+                {loadingCarousel ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 animate-spin text-brand-red" />
+                  </div>
+                ) : carouselImages.length === 0 ? (
+                  <div className="text-center py-20 text-gray-500">
+                    <Image className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                    <p>Nenhuma imagem no carrossel ainda.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {carouselImages.map((image, index) => (
+                      <div 
+                        key={image.id} 
+                        className={`bg-white/5 border rounded-xl p-4 flex items-center gap-4 ${
+                          image.active ? 'border-white/10' : 'border-gray-700/50 opacity-50'
+                        }`}
+                      >
+                        <div className="w-32 h-20 bg-black rounded-lg overflow-hidden flex-shrink-0">
+                          <img 
+                            src={image.image_url} 
+                            alt={`Carousel ${index + 1}`} 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+
+                        <div className="flex-grow">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-white">Imagem #{image.order_index}</h3>
+                            {image.active ? (
+                              <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                ATIVA
+                              </span>
+                            ) : (
+                              <span className="bg-gray-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                INATIVA
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {new Date(image.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleReorderCarousel(image.id, 'up')}
+                            disabled={index === 0}
+                            className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Mover para cima"
+                          >
+                            <ArrowUp className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleReorderCarousel(image.id, 'down')}
+                            disabled={index === carouselImages.length - 1}
+                            className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Mover para baixo"
+                          >
+                            <ArrowDown className="w-4 h-4" />
+                          </button>
+
+                          <button 
+                            onClick={() => handleToggleCarouselImage(image.id, image.active)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              image.active 
+                                ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-white' 
+                                : 'bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white'
+                            }`}
+                            title={image.active ? 'Desativar' : 'Ativar'}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+
+                          <button 
+                            onClick={() => handleDeleteCarouselImage(image.id)}
+                            className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
            {activeTab === 'contact' && (
              <div className="space-y-6 animate-fade-in-up">

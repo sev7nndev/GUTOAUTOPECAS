@@ -1,15 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Search, Zap } from 'lucide-react';
 import { useContent } from '../contexts/ContentContext';
+import { supabase } from '../lib/supabase';
 
 interface HeroProps {
   onSearch?: (term: string) => void;
+}
+
+interface CarouselImage {
+  id: string;
+  image_url: string;
+  order_index: number;
 }
 
 const Hero: React.FC<HeroProps> = ({ onSearch }) => {
   const { content } = useContent();
   const { hero } = content;
   const [searchTerm, setSearchTerm] = useState('');
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Fetch carousel images from Supabase
+  useEffect(() => {
+    const fetchCarouselImages = async () => {
+      const { data, error } = await supabase
+        .from('hero_carousel')
+        .select('*')
+        .eq('active', true)
+        .order('order_index', { ascending: true });
+
+      if (data && data.length > 0) {
+        setCarouselImages(data);
+      } else {
+        // Fallback to default image
+        setCarouselImages([{
+          id: 'default',
+          image_url: hero.bgImage,
+          order_index: 1
+        }]);
+      }
+    };
+
+    fetchCarouselImages();
+  }, [hero.bgImage]);
+
+  // Auto-rotate carousel every 2 seconds
+  useEffect(() => {
+    if (carouselImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % carouselImages.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [carouselImages.length]);
 
   const handleSearch = () => {
     if (onSearch) {
@@ -25,15 +69,20 @@ const Hero: React.FC<HeroProps> = ({ onSearch }) => {
 
   return (
     <div className="relative min-h-[70vh] md:min-h-[85vh] flex items-center bg-[#050505] overflow-hidden">
-      {/* Dynamic Background */}
+      {/* Dynamic Carousel Background */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={hero.bgImage} 
-          alt="Banner" 
-          // @ts-ignore - fetchPriority is valid in React 18+ but TS might complain depending on version
-          fetchPriority="high"
-          className="w-full h-full object-cover opacity-40 scale-105 animate-[pulse_10s_ease-in-out_infinite]"
-        />
+        {carouselImages.map((image, index) => (
+          <img 
+            key={image.id}
+            src={image.image_url} 
+            alt={`Banner ${index + 1}`} 
+            // @ts-ignore
+            fetchPriority={index === 0 ? "high" : "low"}
+            className={`absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-40' : 'opacity-0'
+            }`}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent"></div>
       </div>
