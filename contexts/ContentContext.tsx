@@ -106,7 +106,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
       // Set products, categories, brands
-      if (productsData && productsData.length > 0) newContent.products = productsData;
+      if (productsData && productsData.length > 0) {
+        // Map database fields to TypeScript fields (in_stock -> inStock)
+        newContent.products = productsData.map((product: any) => ({
+          ...product,
+          inStock: product.in_stock ?? false
+        }));
+      }
       if (categoriesData && categoriesData.length > 0) newContent.categories = categoriesData;
       if (brandsData && brandsData.length > 0) newContent.brands = brandsData;
 
