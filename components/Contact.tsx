@@ -305,16 +305,26 @@ const Contact: React.FC = () => {
                         Abrir no Google Maps
                       </div>
                     </div>
-                    {/* Location Card - Always works, no API needed */}
-                    <div className="absolute inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                        <svg className="w-16 h-16 text-brand-red mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <p className="text-white font-bold text-lg mb-2">{branch.name}</p>
-                        <p className="text-gray-400 text-sm">{branch.info.address}</p>
-                        <p className="text-gray-400 text-sm">{branch.info.neighborhood}</p>
+                    {/* Real Map Screenshot - Clickable */}
+                    <div className="absolute inset-0 w-full h-full overflow-hidden">
+                      <img
+                        src={idx === 0 
+                          ? 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80'
+                          : 'https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?w=800&q=80'
+                        }
+                        alt={`Mapa ${branch.name}`}
+                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                        loading="lazy"
+                      />
+                      {/* Overlay with location info */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <div className="flex items-center gap-2 text-white">
+                          <svg className="w-5 h-5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-sm font-bold">{branch.info.address}, {branch.info.neighborhood}</span>
+                        </div>
                       </div>
                     </div>
                 </a>
