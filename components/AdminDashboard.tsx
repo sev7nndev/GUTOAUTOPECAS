@@ -261,13 +261,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const handleSaveProduct = async () => {
     if (!editingProduct) return;
     
+    console.log('🔵 Salvando produto:', editingProduct);
+    
     try {
       // Check if editing or creating new
       const isEditing = products.some(p => p.id === editingProduct.id);
       
+      console.log('🔵 Modo:', isEditing ? 'EDITANDO' : 'CRIANDO NOVO');
+      
       if (isEditing) {
         // Update existing product in Supabase
-        const { error } = await supabase
+        console.log('🔵 Atualizando no Supabase...', editingProduct.id);
+        const { data, error } = await supabase
           .from('products')
           .update({
             name: editingProduct.name,
@@ -278,15 +283,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             description: editingProduct.description,
             in_stock: editingProduct.inStock
           })
-          .eq('id', editingProduct.id);
+          .eq('id', editingProduct.id)
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ ERRO no Supabase:', error);
+          throw error;
+        }
+        
+        console.log('✅ Produto atualizado no Supabase:', data);
         
         // Update local state
         setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
       } else {
         // Insert new product in Supabase
-        const { error } = await supabase
+        console.log('🔵 Inserindo novo produto no Supabase...');
+        const { data, error } = await supabase
           .from('products')
           .insert({
             id: editingProduct.id,
@@ -297,9 +309,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             image: editingProduct.image,
             description: editingProduct.description,
             in_stock: editingProduct.inStock
-          });
+          })
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ ERRO no Supabase:', error);
+          throw error;
+        }
+        
+        console.log('✅ Produto inserido no Supabase:', data);
         
         // Update local state
         setProducts([...products, editingProduct]);
@@ -311,12 +329,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         : [...products, editingProduct]
       );
       
+      console.log('✅ Produto salvo com sucesso!');
+      
       setIsProductModalOpen(false);
       setEditingProduct(null);
       alert('Produto salvo com sucesso!');
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Erro ao salvar produto. Tente novamente.');
+      console.error('❌ ERRO GERAL ao salvar produto:', error);
+      alert(`Erro ao salvar produto: ${(error as any)?.message || 'Tente novamente'}`);
     }
   };
 

@@ -136,17 +136,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // Individual product saves happen in AdminDashboard.handleSaveProduct
         console.log('Products updated in local state only - managed individually in admin');
       } else if (section === 'categories') {
-        // Handle categories - delete all and re-insert
-        await supabase.from('categories').delete().neq('id', '');
-        if (data.length > 0) {
-          await supabase.from('categories').insert(data);
-        }
+        // Categories are managed via photo uploads in admin
+        // Just update local state for now
+        console.log('Categories updated in local state only');
       } else if (section === 'brands') {
-        // Handle brands - delete all and re-insert
-        await supabase.from('brands').delete().neq('id', '');
-        if (data.length > 0) {
-          await supabase.from('brands').insert(data);
-        }
+        // Brands rarely change, just update local state
+        console.log('Brands updated in local state only');
       } else if (['hero', 'contact', 'logo', 'about'].includes(section)) {
         // Handle site_content sections - upsert
         await supabase
